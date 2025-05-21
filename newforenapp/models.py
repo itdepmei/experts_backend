@@ -37,3 +37,11 @@ class CommitteeMember(models.Model):
 
     def __str__(self):
         return self.name
+
+
+
+class IncidentImage(models.Model):
+    insert_uuid = models.CharField(max_length=255, null=True, blank=True)
+    image = models.ImageField(upload_to='incidents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+

@@ -184,3 +184,11 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Static files (CSS, JavaScript, etc.)
+STATIC_URL ='/incidents/'

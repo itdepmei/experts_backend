@@ -6,6 +6,11 @@ class ReportSerializer(serializers.ModelSerializer):
         model = Report
         fields = '__all__'
 
+class IncidentImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IncidentImage
+        fields = '__all__'
+
 class CommitteeMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommitteeMember

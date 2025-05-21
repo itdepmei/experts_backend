@@ -7,4 +7,7 @@ urlpatterns = [
     path('committee-members/', CommitteeMemberView.as_view(), name='committee-members'),
     path('committee-members/<str:uuid>/', CommitteeMemberView.as_view(), name='committee-member-detail'),
     path('committee-members/section/<str:uuid>/', CommitteeMemberBySection.as_view(), name='committee-member-by-section'),
+    path('upload-images/', IncidentImageUploadView.as_view(), name='upload-incident-images'),
+    path('upload-images/<str:insertUuid>/', IncidentImageUploadView.as_view(), name='list-incident-images'),
+
 ]

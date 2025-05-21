@@ -7,6 +7,7 @@ from .serializers import *
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
 
 class ReportAPIView(APIView):
     permission_classes = [AllowAny]
@@ -77,3 +78,75 @@ class CommitteeMemberBySection(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
+
+
+
+class IncidentImageUploadView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        insertUuid = request.data.get('insertUuid')
+        files = request.FILES.getlist('image')
+
+        if not insertUuid or not files:
+            return Response(
+                {"error": "insertUuid and image files are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        images = []
+        for file in files:
+            image = IncidentImage.objects.create(insert_uuid=insertUuid, image=file)
+            
+            images.append(IncidentImageSerializer(image).data)
+
+        return Response(
+            {"message": "Images uploaded successfully.", "images": images},
+            status=status.HTTP_201_CREATED
+        )
+    
+    def get(self, request, *args, **kwargs):
+        insertUuid = kwargs.get('insertUuid')
+
+        if not insertUuid:
+            images = IncidentImage.objects.all()
+            serializer = IncidentImageSerializer(images, many=True)
+            return Response(
+                {"data": serializer.data},
+                
+            )
+
+
+        images = IncidentImage.objects.filter(insert_uuid=insertUuid)
+        
+        if not images:
+            return Response({"error": "No images found for this accident UUID."}, status=status.HTTP_404_NOT_FOUND)
+        
+
+        serializer = IncidentImageSerializer(images, many=True)
+        return Response(
+                            {"data": serializer.data},
+                            status=status.HTTP_200_OK
+                        ) 
+
+    def delete(self, request, *args, **kwargs):
+        image_id = request.query_params.get('id')
+        insert_uuid = request.query_params.get('insertUuid')
+
+        if image_id:
+            try:
+                image = IncidentImage.objects.get(id=image_id)
+                image.delete()
+                return Response({"message": f"Image with ID {image_id} deleted."}, status=status.HTTP_200_OK)
+            except IncidentImage.DoesNotExist:
+                return Response({"error": f"Image with ID {image_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        elif insert_uuid:
+            deleted_count, _ = IncidentImage.objects.filter(insert_uuid=insert_uuid).delete()
+            return Response({"message": f"{deleted_count} images deleted for insertUuid {insert_uuid}."}, status=status.HTTP_200_OK)
+
+        else:
+            deleted_count, _ = IncidentImage.objects.all().delete()
+            return Response({"message": f"All {deleted_count} incident images deleted."}, status=status.HTTP_200_OK)
+
